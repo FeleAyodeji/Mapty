@@ -13,6 +13,8 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
+let map, mapEvent;
+
 // Check if geolocation is available and get the current position
 if (navigator.geolocation) {
   navigator.geolocation.getCurrentPosition(
@@ -35,8 +37,12 @@ if (navigator.geolocation) {
       }).addTo(map);
 
       // Add a click event listener to the map to handle adding markers
-      map.on('click', function (mapEvent) {
-        console.log(mapEvent);
+      map.on('click', function (mapE) {
+        mapEvent = mapE;
+        form.classList.remove('hidden');
+        inputDistance.focus();
+
+        /*  console.log(mapEvent);
         const { lat, lng } = mapEvent.latlng;
 
         // Add a marker to the clicked location and create a popup
@@ -52,7 +58,7 @@ if (navigator.geolocation) {
             })
           )
           .setPopupContent('Workout')
-          .openPopup();
+          .openPopup(); */
       });
     },
 
@@ -62,3 +68,37 @@ if (navigator.geolocation) {
     }
   );
 }
+
+form.addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  //clear input fields
+  inputDistance.value =
+    inputCadence.value =
+    inputDuration.value =
+    inputElevation.value =
+      '';
+
+  console.log(mapEvent);
+  const { lat, lng } = mapEvent.latlng;
+
+  // Add a marker to the clicked location and create a popup
+  L.marker([lat, lng])
+    .addTo(map)
+    .bindPopup(
+      L.popup({
+        maxWidth: 250,
+        minWidth: 100,
+        autoClose: false,
+        closeOnClick: false,
+        className: 'running-popup',
+      })
+    )
+    .setPopupContent('Workout')
+    .openPopup();
+});
+
+inputType.addEventListener('change', function () {
+  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
+});
