@@ -76,12 +76,15 @@ class App {
   #workouts = [];
 
   constructor() {
-    this._getPosition;
+    //get user position
+    this._getPosition();
 
+    //get  data from local storage
+    this._getLocalStorage();
+
+    //attach event handlers
     form.addEventListener('submit', this._newWorkout.bind(this)); // we the form listener was added to the constructor because we want to activate immediately the scripts loads
-
     inputType.addEventListener('change', this._toggleElevationField); // same reason as above , we want it to activate immediately the script load
-
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
@@ -200,8 +203,10 @@ class App {
     this._renderWorkout(workout);
 
     //hide form + clear input fields
-
     this._hideForm();
+
+    // set local storage to all elements
+    this._setLocalStorage();
   }
 
   _renderWorkoutMarker(workout) {
@@ -284,7 +289,27 @@ class App {
     });
 
     //using the public interface
-    workout.click();
+    // workout.click();
+  }
+  _setLocalStorage() {
+    localStorage.setItem('workouts', JSON.stringify(this.#workouts));
+  }
+
+  _getLocalStorage() {
+    const data = JSON.parse(localStorage.getItem('workouts'));
+
+    if (!data) return;
+
+    this.workouts = data;
+
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
+  }
+
+  reset() {
+    localStorage.removeItem('workouts');
+    location.reload();
   }
 }
 
