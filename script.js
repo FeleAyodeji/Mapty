@@ -287,9 +287,6 @@ class App {
       animate: true,
       pan: { duration: 1 },
     });
-
-    //using the public interface
-    // workout.click();
   }
   _setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
