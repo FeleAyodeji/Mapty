@@ -47,6 +47,7 @@ class Cycling extends Workout {
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
+    this.calcSpeed();
     this._setDescription();
   }
   calcSpeed() {
@@ -105,7 +106,7 @@ class App {
     // Get latitude and longitude from the position object
     const latitude = position.coords.latitude;
     const longitude = position.coords.longitude;
-    console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
+    //console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
 
     // Create an array of coordinates using latitude and longitude
     const coords = [latitude, longitude];
@@ -114,13 +115,17 @@ class App {
     this.#map = L.map('map').setView(coords, 13); // L is the Leaflet namespace and it has different methods like map, titlelayer
 
     // Add a tile layer with OpenStreetMap data to the map
-    L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(this.#map);
 
     // Add a click event listener to the map to handle adding markers
     this.#map.on('click', this._showForm.bind(this));
+
+    this.#workouts.forEach(work => {
+      this._renderWorkoutMarker(work);
+    });
   }
 
   _showForm(mapE) {
@@ -221,18 +226,20 @@ class App {
           className: `${workout.type}-popup`,
         })
       )
-      .setPopupContent('workout')
+      .setPopupContent(
+        `${workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'} ${workout.description}`
+      )
       .openPopup();
   }
 
   _renderWorkout(workout) {
     let html = `<li class="workout workout--${workout.type}" data-id= ${
       workout.id
-    }>
+    }">
     <h2 class="workout__title">${workout.description}</h2>
     <div class="workout__details">
       <span class="workout__icon">${
-        workout.type === Running ? '🏃‍♂️' : '🚴‍♀️'
+        workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
       <span class="workout__value">${workout.distance}</span>
       <span class="workout__unit">km</span>
@@ -275,6 +282,9 @@ class App {
   }
 
   _moveToPopup() {
+    // BUGFIX: When we click on a workout before the map has loaded, we get an error. But there is an easy fix:
+    if (!this.#map) return;
+
     const workoutEl = e.target.closest('.workout');
 
     if (!workoutEl) return;
@@ -300,7 +310,7 @@ class App {
     this.workouts = data;
 
     this.#workouts.forEach(work => {
-      this._renderWorkoutMarker(work);
+      this._renderWorkout(work);
     });
   }
 
