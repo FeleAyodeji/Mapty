@@ -411,9 +411,9 @@ class App {
   #mapZoomLevel = 13;
   #workouts = [];
 
-  // Constructor for the app
+  //Constructor for the app
   constructor() {
-    // Get user position
+    //Get user position
     this._getPosition();
 
     // Get data from local storage
